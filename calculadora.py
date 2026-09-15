@@ -1,5 +1,4 @@
 class Processo:
-
     def __init__(self, pid, chegada, duracao):
         self.pid = pid                
         self.chegada = chegada        
@@ -12,9 +11,8 @@ class Processo:
         self.concluido = False
 
 def obter_resultado_final(processos):
-    """Calcula as médias e já entrega a string no formato exato da saída."""
+
     n = len(processos) 
-    
     tr = sum(p.tempo_resposta for p in processos) / n
     te = sum(p.tempo_espera for p in processos) / n
     tt = sum(p.tempo_turnaround for p in processos) / n

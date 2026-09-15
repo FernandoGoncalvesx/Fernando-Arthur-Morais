@@ -1,11 +1,12 @@
-# main.py
 import os
 
 from calculadora import Processo
 from escalonadores import fifo, sjf, srt, rr
 
 def main():
-    caminho_pendrive = r"C:\Users\gcfer\OneDrive\Desktop\TesteSO"
+    print("Jogue o caminho da pasta:")
+    caminhoJogar = input()
+    caminho_pendrive = caminhoJogar.strip()
     
     for num_teste in range(1, 11):
         nome_arquivo_entrada = f"TESTE-{num_teste:02d}.txt"
@@ -19,7 +20,7 @@ def main():
             linhas = f.readlines()
             
         if len(linhas) == 0:
-            print(f"AVISO: O arquivo {nome_arquivo_entrada} está vazio. Pulando...")
+            print(f"O arquivo {nome_arquivo_entrada} vazio")
             continue
             
         quantum = int(linhas[0].strip())
