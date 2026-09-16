@@ -1,16 +1,14 @@
 import os
-
 from calculadora import Processo
 from escalonadores import fifo, sjf, srt, rr
 
 def main():
-    print("Jogue o caminho da pasta:")
+    print("Jogue o caminho:")
     caminhoJogar = input()
-    caminho_pendrive = caminhoJogar.strip()
+    caminho_pendrive = caminhoJogar.strip().strip('"').strip("'")
     
     for num_teste in range(1, 11):
         nome_arquivo_entrada = f"TESTE-{num_teste:02d}.txt"
-        
         caminho_completo_entrada = os.path.join(caminho_pendrive, nome_arquivo_entrada)
         
         if not os.path.exists(caminho_completo_entrada):
@@ -26,10 +24,10 @@ def main():
         quantum = int(linhas[0].strip())
         processos = []
         
-        for idx, linha in enumerate(linhas[1:]):
+        for linha in linhas[1:]:
             if linha.strip():
-                chegada, duracao = map(int, linha.strip().split())
-                processos.append(Processo(idx, chegada, duracao))
+                c, d = map(int, linha.strip().split())
+                processos.append(Processo(c, d))
                 
         resultado_fifo = fifo(processos)
         resultado_sjf = sjf(processos)
@@ -37,7 +35,6 @@ def main():
         resultado_rr = rr(processos, quantum)
         
         nome_arquivo_saida = f"TESTE-{num_teste:02d}-RESULTADO.txt"
-        
         caminho_completo_saida = os.path.join(caminho_pendrive, nome_arquivo_saida)
         
         with open(caminho_completo_saida, 'w') as f:

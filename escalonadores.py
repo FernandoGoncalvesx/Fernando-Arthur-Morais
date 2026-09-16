@@ -1,7 +1,7 @@
 from calculadora import Processo, obter_resultado_final
 
 def fifo(processos_originais):
-    processos = [Processo(p.pid, p.chegada, p.duracao) for p in processos_originais]
+    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
     processos.sort(key=lambda x: x.chegada)
     
     tempo_atual = 0
@@ -18,7 +18,7 @@ def fifo(processos_originais):
     return obter_resultado_final(processos)
 
 def sjf(processos_originais):
-    processos = [Processo(p.pid, p.chegada, p.duracao) for p in processos_originais]
+    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
     processos.sort(key=lambda x: x.chegada)
     
     tempo_atual = 0
@@ -49,7 +49,7 @@ def sjf(processos_originais):
     return obter_resultado_final(processos)
 
 def srt(processos_originais):
-    processos = [Processo(p.pid, p.chegada, p.duracao) for p in processos_originais]
+    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
     processos.sort(key=lambda x: x.chegada)
     
     tempo_atual = 0
@@ -86,7 +86,7 @@ def srt(processos_originais):
     return obter_resultado_final(processos)
 
 def rr(processos_originais, quantum):
-    processos = [Processo(p.pid, p.chegada, p.duracao) for p in processos_originais]
+    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
     processos.sort(key=lambda x: x.chegada)
     
     tempo_atual = 0

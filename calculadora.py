@@ -1,9 +1,8 @@
 class Processo:
-    def __init__(self, pid, chegada, duracao):
-        self.pid = pid                
-        self.chegada = chegada        
-        self.duracao = duracao        
-        self.restante = duracao       
+    def __init__(self, c, d):
+        self.chegada = c
+        self.duracao = d
+        self.restante = d
         
         self.tempo_resposta = -1 
         self.tempo_espera = 0
@@ -11,8 +10,8 @@ class Processo:
         self.concluido = False
 
 def obter_resultado_final(processos):
-
     n = len(processos) 
+    
     tr = sum(p.tempo_resposta for p in processos) / n
     te = sum(p.tempo_espera for p in processos) / n
     tt = sum(p.tempo_turnaround for p in processos) / n
