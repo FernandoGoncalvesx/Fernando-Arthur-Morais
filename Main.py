@@ -35,15 +35,15 @@ def main():
         resultadoRr = rr(processos, quantum)
         
         ArquivoSaida = f"TESTE-{num_teste:02d}-RESULTADO.txt"
-        caminho_completo_saida = os.path.join(caminho, ArquivoSaida)
+        caminhoSaida = os.path.join(caminho, ArquivoSaida)
         
-        with open(caminho_completo_saida, 'w') as f:
+        with open(caminhoSaida, 'w') as f:
             f.write(resultadoFifo + "\n")
             f.write(resultadoSjf + "\n")
             f.write(resultadoSrt + "\n")
             f.write(resultadoRr + "\n")
             
-        print(f"{caminho_completo_saida}")
+        print(f"{caminhoSaida}")
 
 if __name__ == "__main__":
     main()
