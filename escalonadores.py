@@ -1,129 +1,129 @@
-from calculadora import Processo, obter_resultado_final
+from calculadora import Processo, resultadoFinal
 
-def fifo(processos_originais):
-    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
-    processos.sort(key=lambda x: x.chegada)
+def fifo(processosOriginais):
+    processos = [Processo(pontoAtual.chegada, pontoAtual.duracao) for pontoAtual in processosOriginais]
+    processos.sort(key=lambda pontoAtual: pontoAtual.chegada)
     
-    tempo_atual = 0
-    for p_atual in processos:
-        if tempo_atual < p_atual.chegada:
-            tempo_atual = p_atual.chegada
+    tempoAtual = 0
+    for pontoAtual in processos:
+        if tempoAtual < pontoAtual.chegada:
+            tempoAtual = pontoAtual.chegada
             
-        p_atual.tempo_resposta = tempo_atual - p_atual.chegada
-        tempo_atual += p_atual.duracao
+        pontoAtual.tempoResposta = tempoAtual - pontoAtual.chegada
+        tempoAtual += pontoAtual.duracao
         
-        p_atual.tempo_turnaround = tempo_atual - p_atual.chegada
-        p_atual.tempo_espera = p_atual.tempo_turnaround - p_atual.duracao
+        pontoAtual.tempoTurnaround = tempoAtual - pontoAtual.chegada
+        pontoAtual.tempoEspera = pontoAtual.tempoTurnaround - pontoAtual.duracao
         
-    return obter_resultado_final(processos)
+    return resultadoFinal(processos)
 
-def sjf(processos_originais):
-    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
-    processos.sort(key=lambda x: x.chegada)
+def sjf(processosOriginais):
+    processos = [Processo(pontoAtual.chegada, pontoAtual.duracao) for pontoAtual in processosOriginais]
+    processos.sort(key=lambda pontoAtual: pontoAtual.chegada)
     
-    tempo_atual = 0
+    tempoAtual = 0
     concluidos = 0
-    n = len(processos)
+    tamanhoFila = len(processos)
     prontos = []
     i = 0
     
-    while concluidos < n:
-        while i < n and processos[i].chegada <= tempo_atual:
+    while concluidos < tamanhoFila:
+        while i < tamanhoFila and processos[i].chegada <= tempoAtual:
             prontos.append(processos[i])
             i += 1
             
         if not prontos:
-            tempo_atual = processos[i].chegada
+            tempoAtual = processos[i].chegada
             continue
             
-        prontos.sort(key=lambda x: (x.duracao, x.chegada))
-        p_atual = prontos.pop(0)
+        prontos.sort(key=lambda pontoAtual: (pontoAtual.duracao, pontoAtual.chegada))
+        pontoAtual = prontos.pop(0)
         
-        p_atual.tempo_resposta = tempo_atual - p_atual.chegada
-        tempo_atual += p_atual.duracao
+        pontoAtual.tempoResposta = tempoAtual - pontoAtual.chegada
+        tempoAtual += pontoAtual.duracao
         
-        p_atual.tempo_turnaround = tempo_atual - p_atual.chegada
-        p_atual.tempo_espera = p_atual.tempo_turnaround - p_atual.duracao
+        pontoAtual.tempoTurnaround = tempoAtual - pontoAtual.chegada
+        pontoAtual.tempoEspera = pontoAtual.tempoTurnaround - pontoAtual.duracao
         concluidos += 1
         
-    return obter_resultado_final(processos)
+    return resultadoFinal(processos)
 
-def srt(processos_originais):
-    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
-    processos.sort(key=lambda x: x.chegada)
+def srt(processosOriginais):
+    processos = [Processo(pontoAtual.chegada, pontoAtual.duracao) for pontoAtual in processosOriginais]
+    processos.sort(key=lambda pontoAtual: pontoAtual.chegada)
     
-    tempo_atual = 0
+    tempoAtual = 0
     concluidos = 0
-    n = len(processos)
+    tamanhoFila = len(processos)
     prontos = []
     i = 0
     
-    while concluidos < n:
-        while i < n and processos[i].chegada <= tempo_atual:
+    while concluidos < tamanhoFila:
+        while i < tamanhoFila and processos[i].chegada <= tempoAtual:
             prontos.append(processos[i])
             i += 1
             
         if not prontos:
-            tempo_atual = processos[i].chegada
+            tempoAtual = processos[i].chegada
             continue
             
-        prontos.sort(key=lambda x: (x.restante, x.chegada))
-        p_atual = prontos[0]
+        prontos.sort(key=lambda pontoAtual: (pontoAtual.restante, pontoAtual.chegada))
+        pontoAtual = prontos[0]
         
-        if p_atual.tempo_resposta == -1:
-            p_atual.tempo_resposta = tempo_atual - p_atual.chegada
+        if pontoAtual.tempoResposta == -1:
+            pontoAtual.tempoResposta = tempoAtual - pontoAtual.chegada
             
-        p_atual.restante -= 1
-        tempo_atual += 1
+        pontoAtual.restante -= 1
+        tempoAtual += 1
         
-        if p_atual.restante == 0:
-            p_atual.concluido = True
-            p_atual.tempo_turnaround = tempo_atual - p_atual.chegada
-            p_atual.tempo_espera = p_atual.tempo_turnaround - p_atual.duracao
+        if pontoAtual.restante == 0:
+            pontoAtual.concluido = True
+            pontoAtual.tempoTurnaround = tempoAtual - pontoAtual.chegada
+            pontoAtual.tempoEspera = pontoAtual.tempoTurnaround - pontoAtual.duracao
             prontos.pop(0)
             concluidos += 1
             
-    return obter_resultado_final(processos)
+    return resultadoFinal(processos)
 
-def rr(processos_originais, quantum):
-    processos = [Processo(p.chegada, p.duracao) for p in processos_originais]
-    processos.sort(key=lambda x: x.chegada)
+def rr(processosOriginais, quantum):
+    processos = [Processo(pontoAtual.chegada, pontoAtual.duracao) for pontoAtual in processosOriginais]
+    processos.sort(key=lambda pontoAtual: pontoAtual.chegada)
     
-    tempo_atual = 0
+    tempoAtual = 0
     concluidos = 0
-    n = len(processos)
+    tamanhoFila = len(processos)
     fila = []
     i = 0
     
-    while concluidos < n:
-        while i < n and processos[i].chegada <= tempo_atual:
+    while concluidos < tamanhoFila:
+        while i < tamanhoFila and processos[i].chegada <= tempoAtual:
             fila.append(processos[i])
             i += 1
             
         if not fila:
-            tempo_atual = processos[i].chegada
+            tempoAtual = processos[i].chegada
             continue
             
-        p_atual = fila.pop(0)
+        pontoAtual = fila.pop(0)
         
-        if p_atual.tempo_resposta == -1:
-            p_atual.tempo_resposta = tempo_atual - p_atual.chegada
+        if pontoAtual.tempoResposta == -1:
+            pontoAtual.tempoResposta = tempoAtual - pontoAtual.chegada
             
-        tempo_execucao = min(p_atual.restante, quantum)
-        novo_tempo = tempo_atual + tempo_execucao
+        tempoExecucao = min(pontoAtual.restante, quantum)
+        novoTempo = tempoAtual + tempoExecucao
         
-        while i < n and processos[i].chegada <= novo_tempo:
+        while i < tamanhoFila and processos[i].chegada <= novoTempo:
             fila.append(processos[i])
             i += 1
             
-        tempo_atual = novo_tempo
-        p_atual.restante -= tempo_execucao
+        tempoAtual = novoTempo
+        pontoAtual.restante -= tempoExecucao
         
-        if p_atual.restante == 0:
-            p_atual.tempo_turnaround = tempo_atual - p_atual.chegada
-            p_atual.tempo_espera = p_atual.tempo_turnaround - p_atual.duracao
+        if pontoAtual.restante == 0:
+            pontoAtual.tempoTurnaround = tempoAtual - pontoAtual.chegada
+            pontoAtual.tempoEspera = pontoAtual.tempoTurnaround - pontoAtual.duracao
             concluidos += 1
         else:
-            fila.append(p_atual)
+            fila.append(pontoAtual)
             
-    return obter_resultado_final(processos)
+    return resultadoFinal(processos)

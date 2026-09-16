@@ -9,7 +9,7 @@ class Processo:
         self.tempo_turnaround = 0
         self.concluido = False
 
-def obter_resultado_final(processos):
+def resultadoFinal(processos):
     n = len(processos) 
     
     tr = sum(p.tempo_resposta for p in processos) / n

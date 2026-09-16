@@ -5,20 +5,20 @@ from escalonadores import fifo, sjf, srt, rr
 def main():
     print("Jogue o caminho:")
     caminhoJogar = input()
-    caminho_pendrive = caminhoJogar.strip().strip('"').strip("'")
+    caminho = caminhoJogar.strip().strip('"').strip("'")
     
     for num_teste in range(1, 11):
-        nome_arquivo_entrada = f"TESTE-{num_teste:02d}.txt"
-        caminho_completo_entrada = os.path.join(caminho_pendrive, nome_arquivo_entrada)
+        arquivoEntrada = f"TESTE-{num_teste:02d}.txt"
+        caminhoEntrada = os.path.join(caminho, arquivoEntrada)
         
-        if not os.path.exists(caminho_completo_entrada):
+        if not os.path.exists(caminhoEntrada):
             continue
             
-        with open(caminho_completo_entrada, 'r') as f:
+        with open(caminhoEntrada, 'r') as f:
             linhas = f.readlines()
             
         if len(linhas) == 0:
-            print(f"O arquivo {nome_arquivo_entrada} vazio")
+            print(f"O arquivo {arquivoEntrada} vazio")
             continue
             
         quantum = int(linhas[0].strip())
@@ -29,19 +29,19 @@ def main():
                 c, d = map(int, linha.strip().split())
                 processos.append(Processo(c, d))
                 
-        resultado_fifo = fifo(processos)
-        resultado_sjf = sjf(processos)
-        resultado_srt = srt(processos)
-        resultado_rr = rr(processos, quantum)
+        resultadoFifo = fifo(processos)
+        resultadoSjf = sjf(processos)
+        resultadoSrt = srt(processos)
+        resultadoRr = rr(processos, quantum)
         
-        nome_arquivo_saida = f"TESTE-{num_teste:02d}-RESULTADO.txt"
-        caminho_completo_saida = os.path.join(caminho_pendrive, nome_arquivo_saida)
+        ArquivoSaida = f"TESTE-{num_teste:02d}-RESULTADO.txt"
+        caminho_completo_saida = os.path.join(caminho, ArquivoSaida)
         
         with open(caminho_completo_saida, 'w') as f:
-            f.write(resultado_fifo + "\n")
-            f.write(resultado_sjf + "\n")
-            f.write(resultado_srt + "\n")
-            f.write(resultado_rr + "\n")
+            f.write(resultadoFifo + "\n")
+            f.write(resultadoSjf + "\n")
+            f.write(resultadoSrt + "\n")
+            f.write(resultadoRr + "\n")
             
         print(f"{caminho_completo_saida}")
 
