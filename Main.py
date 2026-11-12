@@ -1,7 +1,5 @@
 import os
-
-from paginacao import nru, otimo, relogio, wsclock
-
+from paginacao import otimo, nru, relogio, wsclock
 
 def ler_entrada(caminho):
     with open(caminho, encoding="utf-8-sig") as arquivo:
@@ -24,8 +22,7 @@ def ler_entrada(caminho):
                 continue
             try:
                 pagina, instante, operacao = linha.split()
-                pagina = int(pagina)
-                instante = int(instante)
+                pagina, instante = map(int, (pagina, instante))
             except ValueError:
                 raise ValueError(f"linha {numero}: esperado página, instante e R ou W") from None
 
@@ -34,8 +31,6 @@ def ler_entrada(caminho):
             if not 0 <= instante <= 999999 or operacao not in ("R", "W"):
                 raise ValueError(f"linha {numero}: instante ou operação inválida")
 
-            # A ordem do arquivo decide qual acesso acontece primeiro
-            # quando duas referências têm o mesmo instante.
             referencias.append((pagina, instante, operacao))
     return total_molduras, ciclo, referencias
 
@@ -54,22 +49,22 @@ def main():
 
         try:
             total_molduras, ciclo, referencias = ler_entrada(caminho_entrada)
-            # O formato exige quatro totais, nesta ordem, sem rótulos.
-            resultados = (
-                otimo(referencias, total_molduras),
-                nru(referencias, total_molduras, ciclo),
-                relogio(referencias, total_molduras, ciclo),
-                wsclock(referencias, total_molduras, ciclo),
-            )
+            resultado_otimo = otimo(referencias, total_molduras)
+            resultado_nru = nru(referencias, total_molduras, ciclo)
+            resultado_relogio = relogio(referencias, total_molduras, ciclo)
+            resultado_wsclock = wsclock(referencias, total_molduras, ciclo)
+
+
             with open(caminho_saida, "w", encoding="utf-8") as arquivo:
-                for faltas in resultados:
-                    arquivo.write(f"{faltas}\n")
+                arquivo.write(f"{resultado_otimo}\n")
+                arquivo.write(f"{resultado_nru}\n")
+                arquivo.write(f"{resultado_relogio}\n")
+                arquivo.write(f"{resultado_wsclock}\n")
         except (OSError, ValueError) as erro:
             print(f"{nome_teste}: {erro}")
             continue
 
         print(caminho_saida)
-
 
 if __name__ == "__main__":
     main()

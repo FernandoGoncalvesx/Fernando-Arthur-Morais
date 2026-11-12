@@ -1,75 +1,50 @@
-from collections import defaultdict, deque
-from dataclasses import dataclass
+from collections import defaultdict
+
+from memoria import Memoria
 
 
-@dataclass
-class Moldura:
-    pagina: int
-    ultimo_acesso: int
-    modificada: bool = False
-    referenciada: bool = True
-
-    def registrar_acesso(self, instante, operacao):
-        self.ultimo_acesso = instante
-        self.referenciada = True
-        # Uma leitura posterior não desfaz uma escrita ainda não salva.
-        if operacao == "W":
-            self.modificada = True
-
-    def bit_r(self, instante, ciclo):
-        # A mudança de ciclo equivale a zerar R antes do primeiro acesso
-        # do novo intervalo, sem percorrer todas as molduras a cada acesso.
-        return self.referenciada and self.ultimo_acesso // ciclo == instante // ciclo
-
-
-class Memoria:
-    def __init__(self):
-        self.molduras = []
-        self.indices = {}
-
-    def acessar(self, pagina, instante, operacao):
-        indice = self.indices.get(pagina)
-        if indice is not None:
-            self.molduras[indice].registrar_acesso(instante, operacao)
-        return indice
-
-    def carregar(self, pagina, instante, operacao, indice=None):
-        moldura = Moldura(pagina, instante, modificada=operacao == "W")
-        if indice is None:
-            indice = len(self.molduras)
-            self.molduras.append(moldura)
-        else:
-            del self.indices[self.molduras[indice].pagina]
-            self.molduras[indice] = moldura
-        self.indices[pagina] = indice
-
-
+#
+# Olha os acessos que ainda vão acontecer. Se precisar abrir espaço,
+# retira a página que vai demorar mais para ser usada de novo.
+# Se alguma nunca mais for usada, ela pode sair primeiro.
+#
 def otimo(referencias, total_molduras):
-    futuros = defaultdict(deque)
-    for posicao, (pagina, _, _) in enumerate(referencias):
+    futuros = defaultdict(list)
+    #
+    # Guarda os acessos futuros de trás para frente. Assim, o próximo
+    # acesso fica no fim da lista e pode ser retirado com pop().
+    #
+    for posicao in reversed(range(len(referencias))):
+        pagina, _, _ = referencias[posicao]
         futuros[pagina].append(posicao)
 
     residentes = set()
     faltas = 0
     sem_proximo_acesso = len(referencias)
     for pagina, _, _ in referencias:
-        futuros[pagina].popleft()
+        futuros[pagina].pop()
         if pagina in residentes:
             continue
 
         faltas += 1
         if len(residentes) == total_molduras:
-            # A primeira posição de cada fila é o próximo uso da página.
-            # Uma página que nunca mais será usada tem prioridade para sair.
+            #
+            # Se a lista da página está vazia, ela não vai ser usada de novo.
+            #
             vitima = max(
                 residentes,
-                key=lambda p: futuros[p][0] if futuros[p] else sem_proximo_acesso,
+                key=lambda p: futuros[p][-1] if futuros[p] else sem_proximo_acesso,
             )
             residentes.remove(vitima)
         residentes.add(pagina)
     return faltas
 
 
+#
+# Procura primeiro uma página que não foi usada neste ciclo e não
+# precisa ser salva. Entre páginas igualmente usadas, prefere a que
+# não precisa ser salva.
+#
 def nru(referencias, total_molduras, ciclo):
     memoria = Memoria()
     faltas = 0
@@ -80,19 +55,23 @@ def nru(referencias, total_molduras, ciclo):
         faltas += 1
         vitima = None
         if len(memoria.molduras) == total_molduras:
-            # R tem peso 2 e M tem peso 1, formando as classes 0, 1, 2 e 3.
-            # No empate, fica a primeira moldura dessa classe na ordem física.
-            vitima = min(
-                range(total_molduras),
-                key=lambda i: (
-                    2 * memoria.molduras[i].bit_r(instante, ciclo)
-                    + memoria.molduras[i].modificada
-                ),
+            #
+            # R vale 2 pontos e M vale 1. Sai a página com menos pontos.
+            # Se houver empate, sai a primeira na ordem dos espaços da memória.
+            #
+            moldura = min(
+                memoria.molduras,
+                key=lambda m: 2 * m.bit_r(instante, ciclo) + m.modificada,
             )
+            vitima = memoria.indices[moldura.pagina]
         memoria.carregar(pagina, instante, operacao, vitima)
     return faltas
 
 
+#
+# Olha os espaços da memória em círculo. Quando precisa abrir espaço,
+# retira a primeira página que encontra com a marca R desligada.
+#
 def relogio(referencias, total_molduras, ciclo):
     memoria = Memoria()
     faltas = 0
@@ -100,7 +79,9 @@ def relogio(referencias, total_molduras, ciclo):
     for pagina, instante, operacao in referencias:
         indice = memoria.acessar(pagina, instante, operacao)
         if indice is not None:
-            # Nesta variante, a próxima busca parte da moldura após o acerto.
+            #
+            # Quando a página já está na memória, a próxima busca começa no espaço seguinte.
+            #
             ponteiro = (indice + 1) % total_molduras
             continue
 
@@ -109,8 +90,10 @@ def relogio(referencias, total_molduras, ciclo):
             memoria.carregar(pagina, instante, operacao)
             continue
 
-        # R ligado dá uma segunda chance. Se todos estiverem ligados,
-        # uma volta completa os limpa e garante que a busca termine.
+        #
+        # Se R estiver ligado, desliga a marca e dá mais uma chance à página.
+        # Se todas estiverem marcadas, uma volta basta para desligar todas as marcas.
+        #
         while memoria.molduras[ponteiro].bit_r(instante, ciclo):
             memoria.molduras[ponteiro].referenciada = False
             ponteiro = (ponteiro + 1) % total_molduras
@@ -119,6 +102,10 @@ def relogio(referencias, total_molduras, ciclo):
     return faltas
 
 
+#
+# Olha os espaços em círculo à procura de uma página que está há
+# bastante tempo sem ser usada e que pode sair sem precisar ser salva.
+#
 def wsclock(referencias, total_molduras, ciclo):
     memoria = Memoria()
     faltas = 0
@@ -132,8 +119,10 @@ def wsclock(referencias, total_molduras, ciclo):
             memoria.carregar(pagina, instante, operacao)
             continue
 
-        # O enunciado não fornece um limite de idade separado. Usamos
-        # o ciclo de R e a idade real desde o último acesso à página.
+        #
+        # Uma página é considerada antiga quando o tempo desde o último acesso
+        # é maior que o ciclo informado no arquivo.
+        #
         for _ in range(total_molduras):
             moldura = memoria.molduras[ponteiro]
             if moldura.bit_r(instante, ciclo):
@@ -141,13 +130,16 @@ def wsclock(referencias, total_molduras, ciclo):
             elif instante - moldura.ultimo_acesso > ciclo:
                 if not moldura.modificada:
                     break
-                # Simula a gravação de uma página antiga e suja antes
-                # de continuar procurando uma vítima já limpa.
+                #
+                # Simula salvar a página alterada e segue procurando uma que já esteja salva.
+                #
                 moldura.modificada = False
             ponteiro = (ponteiro + 1) % total_molduras
 
-        # Se nenhuma vítima ideal apareceu, a volta completa traz o ponteiro
-        # de volta ao início. Retiramos essa moldura para garantir progresso.
+        #
+        # Se der uma volta inteira sem encontrar a página que queria,
+        # retira a que estava no espaço onde a busca começou.
+        #
         memoria.carregar(pagina, instante, operacao, ponteiro)
         ponteiro = (ponteiro + 1) % total_molduras
     return faltas
