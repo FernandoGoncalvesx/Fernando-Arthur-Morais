@@ -3,7 +3,6 @@ from paginacao import otimo, nru, relogio, wsclock
 
 def ler_entrada(caminho):
     with open(caminho, encoding="utf-8-sig") as arquivo:
-        # As três primeiras linhas descrevem a memória e o ciclo de R.
         try:
             total_paginas = int(arquivo.readline())
             total_molduras = int(arquivo.readline())
