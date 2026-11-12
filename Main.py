@@ -1,8 +1,11 @@
 import os
 from paginacao import otimo, nru, relogio, wsclock
 
+
+# Lê e valida o arquivo de entrada
 def ler_entrada(caminho):
     with open(caminho, encoding="utf-8-sig") as arquivo:
+        # Linhas 1-3: páginas, molduras e ciclo
         try:
             total_paginas = int(arquivo.readline())
             total_molduras = int(arquivo.readline())
@@ -10,11 +13,13 @@ def ler_entrada(caminho):
         except ValueError:
             raise ValueError("as três primeiras linhas devem conter inteiros") from None
 
+        # Valida limites
         if not (1 <= total_paginas <= 2**32 and 1 <= total_molduras <= 2**32):
             raise ValueError("páginas e molduras devem estar entre 1 e 2³²")
         if not 1 <= ciclo <= 1000:
             raise ValueError("o ciclo de R deve estar entre 1 e 1000")
 
+        # Demais linhas: página, instante, R/W
         referencias = []
         for numero, linha in enumerate(arquivo, start=4):
             if not linha.strip():
@@ -34,11 +39,13 @@ def ler_entrada(caminho):
     return total_molduras, ciclo, referencias
 
 
+# Roda os testes 01 a 10 e grava os resultados
 def main():
     print("Informe o caminho da pasta com os arquivos de teste:")
     caminho = input().strip().strip('"').strip("'")
 
     for num_teste in range(1, 11):
+        # Nomes dos arquivos (TESTE-01.txt / TESTE-01-RESULTADO.txt)
         nome_teste = f"TESTE-{num_teste:02d}"
         caminho_entrada = os.path.join(caminho, f"{nome_teste}.txt")
         caminho_saida = os.path.join(caminho, f"{nome_teste}-RESULTADO.txt")
@@ -47,13 +54,14 @@ def main():
             continue
 
         try:
+            # Roda os 4 algoritmos
             total_molduras, ciclo, referencias = ler_entrada(caminho_entrada)
             resultado_otimo = otimo(referencias, total_molduras)
             resultado_nru = nru(referencias, total_molduras, ciclo)
             resultado_relogio = relogio(referencias, total_molduras, ciclo)
             resultado_wsclock = wsclock(referencias, total_molduras, ciclo)
 
-
+            # Grava na ordem: Ótimo, NRU, Relógio, WSClock
             with open(caminho_saida, "w", encoding="utf-8") as arquivo:
                 arquivo.write(f"{resultado_otimo}\n")
                 arquivo.write(f"{resultado_nru}\n")
@@ -64,6 +72,7 @@ def main():
             continue
 
         print(caminho_saida)
+
 
 if __name__ == "__main__":
     main()
